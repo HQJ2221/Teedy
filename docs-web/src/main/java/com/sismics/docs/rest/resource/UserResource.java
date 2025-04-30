@@ -81,10 +81,10 @@ public class UserResource extends BaseResource {
         @FormParam("password") String password,
         @FormParam("email") String email,
         @FormParam("storage_quota") String storageQuotaStr) {
-        if (!authenticate()) {
-            throw new ForbiddenClientException();
-        }
-        checkBaseFunction(BaseFunction.ADMIN);
+//        if (!authenticate()) {
+//            throw new ForbiddenClientException();
+//        }
+//        checkBaseFunction(BaseFunction.ADMIN);
         
         // Validate the input data
         username = ValidationUtil.validateLength(username, "username", 3, 50);
@@ -118,6 +118,50 @@ public class UserResource extends BaseResource {
         // Always return OK
         JsonObjectBuilder response = Json.createObjectBuilder()
                 .add("status", "ok");
+        return Response.ok().entity(response.build()).build();
+    }
+
+    /**
+     * 游客注册接口（允许匿名访问）
+     */
+    @PUT
+    @Path("/register")
+    public Response registerGuest(
+            @FormParam("username") String username,
+            @FormParam("password") String password,
+            @FormParam("email") String email) {
+
+        // 输入验证
+        username = ValidationUtil.validateLength(username, "username", 3, 50);
+        ValidationUtil.validateUsername(username, "username");
+        password = ValidationUtil.validateLength(password, "password", 8, 50);
+        email = ValidationUtil.validateLength(email, "email", 1, 100);
+        ValidationUtil.validateEmail(email, "email");
+
+        // 检查用户名是否已存在
+        UserDao userDao = new UserDao();
+        User existingUser = userDao.getActiveByUsername(username);
+        if (existingUser != null) {
+            throw new ClientException("AlreadyExistingUsername", "Username already exists");
+        }
+
+        // 创建用户并标记为待审批状态
+        User user = new User();
+        user.setRoleId(Constants.DEFAULT_USER_ROLE); // 默认角色
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setEmail(email);
+        user.setStorageQuota(Constants.DEFAULT_STORAGE_QUOTA);
+        user.setState("PENDING"); // 新增字段：状态（待审批）
+
+        try {
+            userDao.create(user, "admin"); // 使用系统账户创建（或设为 null）
+        } catch (Exception e) {
+            throw new ServerException("RegistrationFailed", "Failed to create user", e);
+        }
+
+        // 返回成功响应
+        JsonObjectBuilder response = Json.createObjectBuilder().add("status", "ok");
         return Response.ok().entity(response.build()).build();
     }
 

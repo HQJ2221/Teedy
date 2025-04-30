@@ -95,6 +95,12 @@ public class User implements Loggable {
     @Column(name = "USE_DISABLEDATE_D")
     private Date disableDate;
 
+    /**
+     * User state
+     */
+    @Column(name = "USE_STATE_C", length = 20)
+    private String state;
+
     public String getId() {
         return id;
     }
@@ -210,6 +216,15 @@ public class User implements Loggable {
 
     public User setOnboarding(boolean onboarding) {
         this.onboarding = onboarding;
+        return this;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public User setState(String state) {
+        this.state = state;
         return this;
     }
 
