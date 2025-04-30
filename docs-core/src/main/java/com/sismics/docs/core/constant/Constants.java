@@ -39,7 +39,12 @@ public class Constants {
      * Default generic user role.
      */
     public static final String DEFAULT_USER_ROLE = "user";
-    
+
+    /**
+     * Default user storage quota (in bytes).
+     */
+    public static final Long DEFAULT_STORAGE_QUOTA = 104857600L; // 100 MB
+
     /**
      * Supported document languages.
      */

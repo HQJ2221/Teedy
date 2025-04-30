@@ -7,6 +7,8 @@
         <a class="list-group-item" ui-sref-active="{ active: 'settings.security.**' }" href="#/settings/security">{{ 'settings.menu_two_factor_auth' | translate }}</a>
         <a class="list-group-item" ui-sref-active="{ active: 'settings.session.**' }" href="#/settings/session">{{ 'settings.menu_opened_sessions' | translate }}</a>
         <a class="list-group-item" ui-sref-active="{ active: 'settings.fileimporter.**' }" href="#/settings/fileimporter">{{ 'settings.menu_file_importer' | translate }}</a>
+        <!-- 新增注册请求菜单项 --> <!-- 仅未登录时显示 -->
+<!--        <a class="list-group-item" ui-sref-active="{ active: 'settings.registration.**' }" href="#/settings/registration" ng-if="!isAuthenticated"> {{ 'settings.menu_registration_request' | translate }}</a>-->
       </ul>
     </div>
 
