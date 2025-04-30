@@ -23,3 +23,4 @@ jobs:
        uses: actions/upload-artifact@v2
        with:
         name: docs-web-ci.war
+        path: docs-web/target/docs*.war
