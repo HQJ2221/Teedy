@@ -15,16 +15,6 @@ angular.module('docs').controller('SettingsUser', function($scope, $state, Resta
     }).then(function(data) {
       $scope.users = data.users;
     });
-
-    // Load pending registration requests
-    Restangular.one('user/register_request/list').get().then(function(data) {
-      $scope.requests = data.requests;
-      // Initialize password and storage_quota for each request
-      angular.forEach($scope.requests, function(request) {
-        request.password = '';
-        request.storage_quota = 0;
-      });
-    });
   };
 
   $scope.loadData();

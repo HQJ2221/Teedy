@@ -1,0 +1,39 @@
+<div ng-controller="SettingsRegistration">
+  <h1>
+    <span translate="settings.registration.title"></span>
+  </h1>
+
+  <table class="table table-hover table-requests">
+    <thead>
+    <tr>
+      <th>{{ 'settings.registration.username' | translate }}</th>
+      <th>{{ 'settings.registration.create_date' | translate }}</th>
+      <th>{{ 'settings.registration.actions' | translate }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="request in requests | orderBy: 'create_date'">
+      <td>{{ request.username }}</td>
+      <td>{{ request.create_date | date: dateFormat }}</td>
+      <td>
+        <div class="input-group">
+          <input type="password" class="form-control"
+                 placeholder="{{ 'settings.registration.password_placeholder' | translate }}"
+                 ng-model="request.password"/>
+          <input type="number" class="form-control"
+                 placeholder="{{ 'settings.registration.storage_quota_placeholder' | translate }}"
+                 ng-model="request.storage_quota"/>
+          <span class="input-group-btn">
+          <button class="btn btn-success" ng-click="approveRequest(request)">
+            {{ 'settings.registration.approve' | translate }}
+          </button>
+          <button class="btn btn-danger" ng-click="rejectRequest(request)">
+            {{ 'settings.registration.reject' | translate }}
+          </button>
+        </span>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
