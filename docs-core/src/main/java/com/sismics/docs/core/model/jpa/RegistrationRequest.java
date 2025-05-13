@@ -15,7 +15,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "T_USER_REGISTER_REQUEST")
-public class UserRegisterRequest {
+public class RegistrationRequest {
     /**
      * Request ID.
      */
@@ -57,7 +57,7 @@ public class UserRegisterRequest {
         return id;
     }
 
-    public UserRegisterRequest setId(String id) {
+    public RegistrationRequest setId(String id) {
         this.id = id;
         return this;
     }
@@ -66,7 +66,7 @@ public class UserRegisterRequest {
         return email;
     }
 
-    public UserRegisterRequest setEmail(String email) {
+    public RegistrationRequest setEmail(String email) {
         this.email = email;
         return this;
     }
@@ -75,7 +75,7 @@ public class UserRegisterRequest {
         return username;
     }
 
-    public UserRegisterRequest setUsername(String username) {
+    public RegistrationRequest setUsername(String username) {
         this.username = username;
         return this;
     }
@@ -84,7 +84,7 @@ public class UserRegisterRequest {
         return status;
     }
 
-    public UserRegisterRequest setStatus(String status) {
+    public RegistrationRequest setStatus(String status) {
         this.status = status;
         return this;
     }
@@ -93,7 +93,7 @@ public class UserRegisterRequest {
         return createDate;
     }
 
-    public UserRegisterRequest setCreateDate(Date createDate) {
+    public RegistrationRequest setCreateDate(Date createDate) {
         this.createDate = createDate;
         return this;
     }
@@ -102,7 +102,7 @@ public class UserRegisterRequest {
         return processDate;
     }
 
-    public UserRegisterRequest setProcessDate(Date processDate) {
+    public RegistrationRequest setProcessDate(Date processDate) {
         this.processDate = processDate;
         return this;
     }

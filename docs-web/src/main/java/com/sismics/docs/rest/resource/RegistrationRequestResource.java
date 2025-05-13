@@ -2,15 +2,14 @@ package com.sismics.docs.rest.resource;
 
 import com.sismics.docs.core.constant.Constants;
 import com.sismics.docs.core.dao.UserDao;
-import com.sismics.docs.core.dao.UserRegisterRequestDao;
+import com.sismics.docs.core.dao.RegistrationRequestDao;
 import com.sismics.docs.core.model.jpa.User;
-import com.sismics.docs.core.model.jpa.UserRegisterRequest;
+import com.sismics.docs.core.model.jpa.RegistrationRequest;
 import com.sismics.docs.rest.constant.BaseFunction;
 import com.sismics.rest.exception.ClientException;
 import com.sismics.rest.exception.ForbiddenClientException;
 import com.sismics.rest.exception.ServerException;
 import com.sismics.rest.util.ValidationUtil;
-import com.sismics.util.JsonUtil;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
@@ -26,7 +25,7 @@ import java.util.List;
  * @author jtremeaux
  */
 @Path("/user/register_request")
-public class UserRegisterRequestResource extends BaseResource {
+public class RegistrationRequestResource extends BaseResource {
 
     /**
      * Submits a new user registration request.
@@ -62,13 +61,13 @@ public class UserRegisterRequestResource extends BaseResource {
         if (userDao.getActiveByUsername(username) != null) {
             throw new ClientException("AlreadyExistingUsername", "Username already used");
         }
-        UserRegisterRequestDao requestDao = new UserRegisterRequestDao();
+        RegistrationRequestDao requestDao = new RegistrationRequestDao();
         if (requestDao.getByEmail(email) != null) {
             throw new ClientException("AlreadyExistingEmail", "Email already requested");
         }
 
         // Create the registration request
-        UserRegisterRequest request = new UserRegisterRequest();
+        RegistrationRequest request = new RegistrationRequest();
         request.setUsername(username);
         request.setEmail(email);
         request.setStatus("PENDING");
@@ -105,10 +104,10 @@ public class UserRegisterRequestResource extends BaseResource {
         }
         checkBaseFunction(BaseFunction.ADMIN);
 
-        UserRegisterRequestDao requestDao = new UserRegisterRequestDao();
-        List<UserRegisterRequest> requests = requestDao.getPendingRequests();
+        RegistrationRequestDao requestDao = new RegistrationRequestDao();
+        List<RegistrationRequest> requests = requestDao.getPendingRequests();
         JsonArrayBuilder requestArray = Json.createArrayBuilder();
-        for (UserRegisterRequest request : requests) {
+        for (RegistrationRequest request : requests) {
             requestArray.add(Json.createObjectBuilder()
                     .add("id", request.getId())
                     .add("username", request.getUsername())
@@ -160,8 +159,8 @@ public class UserRegisterRequestResource extends BaseResource {
         Long storageQuota = ValidationUtil.validateLong(storageQuotaStr, "storage_quota");
 
         // Get the request
-        UserRegisterRequestDao requestDao = new UserRegisterRequestDao();
-        UserRegisterRequest request = requestDao.getById(id);
+        RegistrationRequestDao requestDao = new RegistrationRequestDao();
+        RegistrationRequest request = requestDao.getById(id);
         if (request == null || !"PENDING".equals(request.getStatus())) {
             throw new ClientException("RequestNotFound", "Request not found or already processed");
         }
@@ -222,8 +221,8 @@ public class UserRegisterRequestResource extends BaseResource {
         checkBaseFunction(BaseFunction.ADMIN);
 
         // Get the request
-        UserRegisterRequestDao requestDao = new UserRegisterRequestDao();
-        UserRegisterRequest request = requestDao.getById(id);
+        RegistrationRequestDao requestDao = new RegistrationRequestDao();
+        RegistrationRequest request = requestDao.getById(id);
         if (request == null || !"PENDING".equals(request.getStatus())) {
             throw new ClientException("RequestNotFound", "Request not found or already processed");
         }

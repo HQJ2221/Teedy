@@ -1,6 +1,6 @@
 package com.sismics.docs.core.dao;
 
-import com.sismics.docs.core.model.jpa.UserRegisterRequest;
+import com.sismics.docs.core.model.jpa.RegistrationRequest;
 import com.sismics.util.context.ThreadLocalContext;
 
 import jakarta.persistence.EntityManager;
@@ -15,7 +15,7 @@ import java.util.UUID;
  *
  * @author jtremeaux
  */
-public class UserRegisterRequestDao {
+public class RegistrationRequestDao {
 
     /**
      * Creates a new user registration request.
@@ -23,7 +23,7 @@ public class UserRegisterRequestDao {
      * @param request User registration request to create
      * @return Request ID
      */
-    public String create(UserRegisterRequest request) {
+    public String create(RegistrationRequest request) {
         request.setId(UUID.randomUUID().toString());
         request.setCreateDate(new Date());
         EntityManager em = ThreadLocalContext.get().getEntityManager();
@@ -37,10 +37,10 @@ public class UserRegisterRequestDao {
      * @param id Request ID
      * @return UserRegisterRequest or null if not found
      */
-    public UserRegisterRequest getById(String id) {
+    public RegistrationRequest getById(String id) {
         EntityManager em = ThreadLocalContext.get().getEntityManager();
         try {
-            return em.find(UserRegisterRequest.class, id);
+            return em.find(RegistrationRequest.class, id);
         } catch (NoResultException e) {
             return null;
         }
@@ -52,12 +52,12 @@ public class UserRegisterRequestDao {
      * @param email Email address
      * @return UserRegisterRequest or null if not found
      */
-    public UserRegisterRequest getByEmail(String email) {
+    public RegistrationRequest getByEmail(String email) {
         EntityManager em = ThreadLocalContext.get().getEntityManager();
-        Query q = em.createQuery("select urr from UserRegisterRequest urr where urr.email = :email");
+        Query q = em.createQuery("select urr from RegistrationRequest urr where urr.email = :email");
         q.setParameter("email", email);
         try {
-            return (UserRegisterRequest) q.getSingleResult();
+            return (RegistrationRequest) q.getSingleResult();
         } catch (NoResultException e) {
             return null;
         }
@@ -68,9 +68,9 @@ public class UserRegisterRequestDao {
      *
      * @return List of pending UserRegisterRequest
      */
-    public List<UserRegisterRequest> getPendingRequests() {
+    public List<RegistrationRequest> getPendingRequests() {
         EntityManager em = ThreadLocalContext.get().getEntityManager();
-        Query q = em.createQuery("select urr from UserRegisterRequest urr where urr.status = :status order by urr.createDate asc");
+        Query q = em.createQuery("select urr from RegistrationRequest urr where urr.status = :status order by urr.createDate asc");
         q.setParameter("status", "PENDING");
         return q.getResultList();
     }
@@ -81,7 +81,7 @@ public class UserRegisterRequestDao {
      * @param request User registration request to update
      * @return Updated UserRegisterRequest
      */
-    public UserRegisterRequest update(UserRegisterRequest request) {
+    public RegistrationRequest update(RegistrationRequest request) {
         EntityManager em = ThreadLocalContext.get().getEntityManager();
         return em.merge(request);
     }
