@@ -27,7 +27,13 @@
     "email_invalid": "邮箱不符合格式",
     "email_length": "邮箱长度必须在 3 到 254 个字符之间",
     "cancel": "取消",
-    "submit": "提交申请"
+    "submit": "提交申请",
+    "success_title": "注册请求已发送",
+    "success_message": "注册请求已发送至 <strong>{{ email }}</strong>，请检查您的邮箱以获取更多信息",
+    "error_title": "注册请求出错",
+    "error_username_exists": "用户名已存在",
+    "error_email_exists": "邮箱已存在",
+    "error_message": "注册请求失败，请联系管理员"
   },
   "passwordlost": {
     "title": "丢失密码",
@@ -255,6 +261,7 @@
     "menu_general_settings": "一般设置",
     "menu_workflow": "工作流程",
     "menu_users": "用户",
+    "menu_registration": "用户注册请求",
     "menu_groups": "群组",
     "menu_vocabularies": "词条",
     "menu_configuration": "配置",
@@ -325,6 +332,22 @@
         "confirm_password": "确认您的密码",
         "submit": "不激活双重身份验证"
       }
+    },
+    "registration": {
+      "title": "注册请求",
+      "username": "注册用户名",
+      "create_date": "注册日期",
+      "actions": "操作",
+      "password_placeholder": "输入初始密码",
+      "storage_quota_placeholder": "输入初始容量",
+      "approve": "同意",
+      "reject": "拒绝",
+      "approve_error_title": "无法为用户注册",
+      "approve_error_message": "无法为用户注册, 请检查输入",
+      "approve_success_title": "用户注册成功",
+      "approve_success_message": "用户注册成功, 密码已发送至 <strong>{{ username }}</strong>",
+      "reject_success_title": "用户注册请求已拒绝",
+      "reject_success_message": "用户注册请求已拒绝, 邮件已发送至 <strong>{{ username }}</strong>"
     },
     "group": {
       "title": "群组 <small>管理</small>",

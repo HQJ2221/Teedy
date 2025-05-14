@@ -23,13 +23,16 @@
           <input type="number" class="form-control"
                  placeholder="{{ 'settings.registration.storage_quota_placeholder' | translate }}"
                  ng-model="request.storage_quota"/>
-          <span class="input-group-btn">
-          <button class="btn btn-success" ng-click="approveRequest(request)">
-            {{ 'settings.registration.approve' | translate }}
-          </button>
-          <button class="btn btn-danger" ng-click="rejectRequest(request)">
-            {{ 'settings.registration.reject' | translate }}
-          </button>
+          <span class="input-group-btn"></span>
+          <div class="col-md-12 text-right">
+            <button class="btn btn-success" ng-click="approveRequest(request)">
+              <span class="fa fa-check"></span> {{ 'settings.registration.approve' | translate }}
+            </button>
+            <span></span>
+            <button class="btn btn-danger" ng-click="rejectRequest(request)">
+              <span class="fa fa-times"></span> {{ 'settings.registration.reject' | translate }}
+            </button>
+          </div>
         </span>
         </div>
       </td>

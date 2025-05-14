@@ -53,8 +53,8 @@ angular.module('docs').controller('SettingsRegistration', function($scope, $stat
   $scope.rejectRequest = function (request) {
     Restangular.one('user/register_request/' + request.id + '/reject').post().then(function () {
       $scope.loadData(); // Reload data to reflect changes
-      var title = $translate.instant('settings.user.reject_success_title');
-      var msg = $translate.instant('settings.user.reject_success_message');
+      var title = $translate.instant('settings.registration.reject_success_title');
+      var msg = $translate.instant('settings.registration.reject_success_message');
       var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
       $dialog.messageBox(title, msg, btns);
     });
