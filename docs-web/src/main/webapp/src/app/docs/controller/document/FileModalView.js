@@ -73,6 +73,42 @@ angular.module('docs').controller('FileModalView', function ($uibModalInstance, 
     }
   };
 
+  // define some variables
+  $scope.isTranslating = false; // 是否正在翻译
+  $scope.isTranslated = false; // 是否翻译完成
+  $scope.translateMessage = ''; // 翻译消息
+  $scope.translatedShow = false;
+
+  /**
+   * translate a file to ZH-CN
+   */
+  $scope.translate = function () {
+    $scope.isTranslating = true; // 开始翻译
+    Restangular.one('file/' + $stateParams.fileId + '/translate').post().then(function(response) {
+      $scope.isTranslating = false; // 翻译完成
+      $scope.isTranslated = true; // 翻译完成
+
+      $scope.translateMessage = 'success';
+      $scope.trustedFileUrl = $sce.trustAsResourceUrl('../api/file/' + response.fileId + '/data');
+      // $scope.file.mimetype = 'application/pdf';
+      $scope.translatedShow = true;
+
+      // 显示成功提示
+      var title = $translate.instant("Translate Successfully");
+      var msg = $translate.instant("The file has been translated");
+      var btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
+      $dialog.messageBox(title, msg, btns);
+    }, function(error) {
+      $scope.isTranslating = false;
+
+      // 显示错误提示
+      var title = $translate.instant("Error");
+      var msg = $translate.instant("Failed to translate the file");
+      var btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
+      $dialog.messageBox(title, msg, btns);
+    })
+  }
+
   /**
    * Open the file in a new window.
    */

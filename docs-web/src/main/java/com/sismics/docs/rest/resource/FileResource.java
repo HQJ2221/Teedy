@@ -27,6 +27,8 @@ import com.sismics.util.HttpUtil;
 import com.sismics.util.JsonUtil;
 import com.sismics.util.context.ThreadLocalContext;
 import com.sismics.util.mime.MimeType;
+import com.sismics.docs.rest.util.TranslationUtil;
+import com.sismics.util.mime.MimeTypeUtil;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -39,9 +41,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.StreamingOutput;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -541,7 +547,203 @@ public class FileResource extends BaseResource {
                 .add("status", "ok");
         return Response.ok().entity(response.build()).build();
     }
-    
+
+    /**
+     * translate a file
+     */
+    @POST
+    @Path("{id: [a-z0-9\\-]+}/translate")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response translate(@PathParam("id") String id) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+//        File file = findFile(id, null);
+//
+//        // Get the user who created the file (for decryption)
+//        UserDao userDao = new UserDao();
+//        User user = userDao.getById(file.getUserId());
+//        if (user == null) {
+//            throw new NotFoundException();
+//        }
+//
+//        // Decrypt the file
+//        java.nio.file.Path storedFile = DirectoryUtil.getStorageDirectory().resolve(id);
+//        java.nio.file.Path unencryptedFile;
+//        try {
+//            unencryptedFile = EncryptionUtil.decryptFile(storedFile, user.getPrivateKey());
+//            java.nio.file.Path targetFile = unencryptedFile.getParent().resolve(file.getName());
+//            Files.move(unencryptedFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+//            unencryptedFile = targetFile;
+//        } catch (Exception e) {
+//            throw new ServerException("DecryptionError", "Error decrypting the file", e);
+//        }
+//
+//        JSONObject body;
+//
+//        try {
+//            byte[] fileContent = Files.readAllBytes(unencryptedFile);
+//            String base64String = Base64.encodeBase64String(fileContent);
+//            body = buildBody(base64String, file);
+//        } catch (Exception e) {
+//            throw new ServerException("DecryptionError", "Error read file content", e);
+//        }
+//
+//        if (body.isEmpty()) {
+//            throw new ClientException("BuildError", "Error build request body.");
+//        }
+//
+//        String responseString = TranslationUtil.doPost(TranslationUtil.CREATE_TRANS_JOB, body);
+//        if (responseString == null) {
+//            throw new ClientException("PostError", "Error post request.");
+//        }
+//
+//        int requestId;
+//        JSONObject postResponse = parseJsonTrans(responseString);
+//        System.out.println(postResponse);
+//        if (postResponse == null) {
+//            throw new ClientException("PostError", "Receive NULL response");
+//        } else if (postResponse.optInt("code") != 0) {
+//            throw new ClientException("PostError", "code is 0");
+//        } else if (postResponse.optString("requestId") == null) {
+//            throw new ClientException("PostError", "data or request ID is null");
+//        } else {
+//            requestId = postResponse.optInt("requestId");
+//        }
+
+        int requestId = 6431009;
+        // 查询翻译进度
+        JSONObject queryData;
+        System.out.println("\033[32m" + "Post success. RequestId: " + requestId + "\033[0m");
+        int time = 0;
+        while (true) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(time++);
+            if (time > 50) {
+                System.out.println();
+                break;
+            }
+
+            JSONObject queryBody = new JSONObject();
+            queryBody.put("requestId", requestId);
+            String queryResponseString = TranslationUtil.doPost(TranslationUtil.QUERY_TRANS_JOB, queryBody);
+            if (queryResponseString == null) {
+                throw new ClientException("PostError", "Error post request.");
+            }
+            JSONObject queryResponse = parseJsonTrans(queryResponseString);
+            if (queryResponse == null) {
+                throw new ClientException("QueryError", "Error query trans response.");
+            } else {
+                System.out.println(queryResponse);
+                queryData = queryResponse;
+            }
+
+            if (queryData.optInt("status") == 2) {
+                break;
+            } else if (queryData.optInt("status") == 1) {
+//                JsonObjectBuilder response = Json.createObjectBuilder()
+//                        .add("status", "ok")
+//                        .add("data", queryData.optString("fileSrcUrl"));
+//                return Response.ok().entity(response.build()).build();
+                // 获取 fileSrcUrl
+                String fileSrcUrl = queryData.optString("fileSrcUrl");
+                if (fileSrcUrl == null || fileSrcUrl.isEmpty()) {
+                    throw new ClientException("UrlError", "fileSrcUrl is missing.");
+                }
+
+                // 从 fileSrcUrl 下载文件并保存为临时文件
+                java.nio.file.Path unencryptedFile;
+                long fileSize;
+                try {
+                    URL url = new URL(fileSrcUrl);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    try (InputStream inputStream = connection.getInputStream()) {
+                        unencryptedFile = Files.createTempFile("translated_file", ".pdf"); // 文件类型可根据实际调整
+                        Files.copy(inputStream, unencryptedFile, StandardCopyOption.REPLACE_EXISTING);
+                        fileSize = Files.size(unencryptedFile);
+                    }
+                    connection.disconnect();
+                } catch (Exception e) {
+                    throw new ServerException("DownloadError", "Error downloading the file from fileSrcUrl", e);
+                }
+
+                // 获取原始文件元数据
+                File originalFile = findFile(id, null);
+                String fileName = "translated_" + originalFile.getName(); // 文件名可自定义
+
+                // 调用 FileUtil.createFile 创建文件
+                try {
+                    String newFileId = FileUtil.createFile(
+                            fileName,                 // 文件名
+                            null,                     // previousFileId（无替换时为 null）
+                            unencryptedFile,          // 未加密的临时文件
+                            fileSize,                 // 文件大小
+                            null,                     // 语言
+                            principal.getId(),        // 用户 ID
+                            originalFile.getDocumentId() // 文档 ID
+                    );
+
+                    // 返回新创建的 fileId 给前端
+                    JsonObjectBuilder response = Json.createObjectBuilder()
+                            .add("status", "ok")
+                            .add("fileId", newFileId);
+                    return Response.ok().entity(response.build()).build();
+                } catch (Exception e) {
+                    throw new ServerException("FileCreationError", "Error creating the file", e);
+                } finally {
+                    // 清理临时文件
+                    try {
+                        Files.deleteIfExists(unencryptedFile);
+                    } catch (IOException e) {
+                        System.err.println("Error deleting temporary file: " + e.getMessage());
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private JSONObject buildBody(String content, File file) {
+        JSONObject body = new JSONObject();
+
+        JSONObject input = new JSONObject();
+        input.put("filename", file.getName());
+        input.put("content", content);
+        String type = MimeTypeUtil.getFileExtension(file.getMimeType());
+        input.put("format", type);
+
+        // 输出信息设置
+        JSONObject output = new JSONObject();
+        // 指定输出格式，参考附录 支持格式 内容。传空表示按照默认格式输出
+        output.put("format", type);
+
+        body.put("from", "en");
+        body.put("to", "zh");
+        body.put("input", input);
+        body.put("output", output);
+
+        return body;
+    }
+
+    public static JSONObject parseJsonTrans(String jsonString) {
+        JSONObject jsonObject = new JSONObject(jsonString);
+        if (!jsonObject.isEmpty()) {
+            int code = jsonObject.optInt("code");
+            if (code != 0) {
+                return null;
+            }
+            return jsonObject.optJSONObject("data");
+        }
+        return jsonObject;
+    }
+
+
     /**
      * Returns a file.
      *
