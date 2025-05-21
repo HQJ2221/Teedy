@@ -29,6 +29,7 @@ import com.sismics.util.context.ThreadLocalContext;
 import com.sismics.util.mime.MimeType;
 import com.sismics.docs.rest.util.TranslationUtil;
 import com.sismics.util.mime.MimeTypeUtil;
+import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -559,60 +560,60 @@ public class FileResource extends BaseResource {
             throw new ForbiddenClientException();
         }
 
-//        File file = findFile(id, null);
-//
-//        // Get the user who created the file (for decryption)
-//        UserDao userDao = new UserDao();
-//        User user = userDao.getById(file.getUserId());
-//        if (user == null) {
-//            throw new NotFoundException();
-//        }
-//
-//        // Decrypt the file
-//        java.nio.file.Path storedFile = DirectoryUtil.getStorageDirectory().resolve(id);
-//        java.nio.file.Path unencryptedFile;
-//        try {
-//            unencryptedFile = EncryptionUtil.decryptFile(storedFile, user.getPrivateKey());
-//            java.nio.file.Path targetFile = unencryptedFile.getParent().resolve(file.getName());
-//            Files.move(unencryptedFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-//            unencryptedFile = targetFile;
-//        } catch (Exception e) {
-//            throw new ServerException("DecryptionError", "Error decrypting the file", e);
-//        }
-//
-//        JSONObject body;
-//
-//        try {
-//            byte[] fileContent = Files.readAllBytes(unencryptedFile);
-//            String base64String = Base64.encodeBase64String(fileContent);
-//            body = buildBody(base64String, file);
-//        } catch (Exception e) {
-//            throw new ServerException("DecryptionError", "Error read file content", e);
-//        }
-//
-//        if (body.isEmpty()) {
-//            throw new ClientException("BuildError", "Error build request body.");
-//        }
-//
-//        String responseString = TranslationUtil.doPost(TranslationUtil.CREATE_TRANS_JOB, body);
-//        if (responseString == null) {
-//            throw new ClientException("PostError", "Error post request.");
-//        }
-//
-//        int requestId;
-//        JSONObject postResponse = parseJsonTrans(responseString);
-//        System.out.println(postResponse);
-//        if (postResponse == null) {
-//            throw new ClientException("PostError", "Receive NULL response");
-//        } else if (postResponse.optInt("code") != 0) {
-//            throw new ClientException("PostError", "code is 0");
-//        } else if (postResponse.optString("requestId") == null) {
-//            throw new ClientException("PostError", "data or request ID is null");
-//        } else {
-//            requestId = postResponse.optInt("requestId");
-//        }
+        File file = findFile(id, null);
 
-        int requestId = 6431009;
+        // Get the user who created the file (for decryption)
+        UserDao userDao = new UserDao();
+        User user = userDao.getById(file.getUserId());
+        if (user == null) {
+            throw new NotFoundException();
+        }
+
+        // Decrypt the file
+        java.nio.file.Path storedFile = DirectoryUtil.getStorageDirectory().resolve(id);
+        java.nio.file.Path unencryptedFile;
+        try {
+            unencryptedFile = EncryptionUtil.decryptFile(storedFile, user.getPrivateKey());
+            java.nio.file.Path targetFile = unencryptedFile.getParent().resolve(file.getName());
+            Files.move(unencryptedFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+            unencryptedFile = targetFile;
+        } catch (Exception e) {
+            throw new ServerException("DecryptionError", "Error decrypting the file", e);
+        }
+
+        JSONObject body;
+
+        try {
+            byte[] fileContent = Files.readAllBytes(unencryptedFile);
+            String base64String = Base64.encodeBase64String(fileContent);
+            body = buildBody(base64String, file);
+        } catch (Exception e) {
+            throw new ServerException("DecryptionError", "Error read file content", e);
+        }
+
+        if (body.isEmpty()) {
+            throw new ClientException("BuildError", "Error build request body.");
+        }
+
+        String responseString = TranslationUtil.doPost(TranslationUtil.CREATE_TRANS_JOB, body);
+        if (responseString == null) {
+            throw new ClientException("PostError", "Error post request.");
+        }
+
+        int requestId;
+        JSONObject postResponse = parseJsonTrans(responseString);
+        System.out.println(postResponse);
+        if (postResponse == null) {
+            throw new ClientException("PostError", "Receive NULL response");
+        } else if (postResponse.optInt("code") != 0) {
+            throw new ClientException("PostError", "code is 0");
+        } else if (postResponse.optString("requestId") == null) {
+            throw new ClientException("PostError", "data or request ID is null");
+        } else {
+            requestId = postResponse.optInt("requestId");
+        }
+
+//        int requestId = 6431009;
         // 查询翻译进度
         JSONObject queryData;
         System.out.println("\033[32m" + "Post success. RequestId: " + requestId + "\033[0m");
@@ -657,16 +658,16 @@ public class FileResource extends BaseResource {
                 }
 
                 // 从 fileSrcUrl 下载文件并保存为临时文件
-                java.nio.file.Path unencryptedFile;
+                java.nio.file.Path unencryptedFile_new;
                 long fileSize;
                 try {
                     URL url = new URL(fileSrcUrl);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
                     try (InputStream inputStream = connection.getInputStream()) {
-                        unencryptedFile = Files.createTempFile("translated_file", ".pdf"); // 文件类型可根据实际调整
-                        Files.copy(inputStream, unencryptedFile, StandardCopyOption.REPLACE_EXISTING);
-                        fileSize = Files.size(unencryptedFile);
+                        unencryptedFile_new = Files.createTempFile("translated_file", ".pdf"); // 文件类型可根据实际调整
+                        Files.copy(inputStream, unencryptedFile_new, StandardCopyOption.REPLACE_EXISTING);
+                        fileSize = Files.size(unencryptedFile_new);
                     }
                     connection.disconnect();
                 } catch (Exception e) {
@@ -682,7 +683,7 @@ public class FileResource extends BaseResource {
                     String newFileId = FileUtil.createFile(
                             fileName,                 // 文件名
                             null,                     // previousFileId（无替换时为 null）
-                            unencryptedFile,          // 未加密的临时文件
+                            unencryptedFile_new,      // 未加密的临时文件
                             fileSize,                 // 文件大小
                             null,                     // 语言
                             principal.getId(),        // 用户 ID
@@ -699,7 +700,7 @@ public class FileResource extends BaseResource {
                 } finally {
                     // 清理临时文件
                     try {
-                        Files.deleteIfExists(unencryptedFile);
+                        Files.deleteIfExists(unencryptedFile_new);
                     } catch (IOException e) {
                         System.err.println("Error deleting temporary file: " + e.getMessage());
                     }

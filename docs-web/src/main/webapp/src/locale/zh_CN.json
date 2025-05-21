@@ -338,7 +338,7 @@
       "username": "注册用户名",
       "create_date": "注册日期",
       "actions": "操作",
-      "password_placeholder": "输入初始密码",
+      "password_placeholder": "输入初始密码（密码必须大于8位，否则无法注册！）",
       "storage_quota_placeholder": "输入初始容量",
       "approve": "同意",
       "reject": "拒绝",
